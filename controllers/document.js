@@ -41,5 +41,30 @@ module.exports = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Deletes all the entries in the database
+   */
+  clear: async (req, res, next) => {
+    try {
+      await ParagraphService.deleteAll();
+      responses.ok(res);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Search paragraphs by a given word in the query parameter
+   */
+  search: async (req, res, next) => {
+    try {
+      const { word } = req.query;
+      const paragraphs = await ParagraphService.search(word);
+      responses.ok(res, { paragraphs });
+    } catch (error) {
+      next(error);
+    }
   }
 };
