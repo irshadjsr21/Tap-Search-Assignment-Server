@@ -71,7 +71,14 @@ const ParagraphService = {
             type: db.Sequelize.QueryTypes.SELECT
           }
         );
-        resolve(paragraphs);
+        const idList = [];
+        resolve(
+          paragraphs.filter(para => {
+            if (idList.includes(para.id)) return false;
+            idList.push(para.id);
+            return true;
+          })
+        );
       } catch (error) {
         reject(error);
       }
