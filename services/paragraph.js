@@ -12,13 +12,13 @@ const ParagraphService = {
   /**
    * Store a single paragraph
    */
-  store: async body =>
+  store: async (body, transaction) =>
     new Promise(async (resolve, reject) => {
       try {
-        const paragraph = await Paragraph.create({ body });
+        const paragraph = await Paragraph.create({ body }, { transaction });
         const words = paragraph.body.split(' ');
         resolve(paragraph);
-        await WordService.storeAll(words, paragraph.id);
+        await WordService.storeAll(words, paragraph.id, transaction);
       } catch (error) {
         reject(error);
       }
@@ -30,10 +30,14 @@ const ParagraphService = {
   storeAll: async paragraphs =>
     new Promise(async (resolve, reject) => {
       try {
+        let transaction = await db.sequelize.transaction();
         const storedParagraphs = [];
         for (const paragraph of paragraphs) {
-          storedParagraphs.push(await ParagraphService.store(paragraph));
+          storedParagraphs.push(
+            await ParagraphService.store(paragraph, transaction)
+          );
         }
+        await transaction.commit();
         resolve(storedParagraphs);
       } catch (error) {
         reject(error);

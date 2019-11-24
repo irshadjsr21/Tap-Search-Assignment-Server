@@ -10,7 +10,7 @@ const WordService = {
   /**
    * Store a single word
    */
-  store: async (word, paragraphId) =>
+  store: async (word, paragraphId, transaction) =>
     new Promise(async (resolve, reject) => {
       try {
         // Removing special characters
@@ -24,7 +24,8 @@ const WordService = {
         }
 
         const createdWords = await Word.findOrCreate({
-          where: { word: formattedWord.toLowerCase() }
+          where: { word: formattedWord.toLowerCase() },
+          transaction
         });
         if (createdWords.length <= 0) {
           resolve(null);
@@ -32,10 +33,13 @@ const WordService = {
         }
 
         const createdWord = createdWords[0];
-        await WordIndex.create({
-          wordId: createdWord.dataValues.id,
-          paragraphId
-        });
+        await WordIndex.create(
+          {
+            wordId: createdWord.dataValues.id,
+            paragraphId
+          },
+          { transaction }
+        );
         resolve(createdWord);
       } catch (error) {
         reject(error);
@@ -45,12 +49,14 @@ const WordService = {
   /**
    * Store multiple words
    */
-  storeAll: async (words, paragraphId) =>
+  storeAll: async (words, paragraphId, transaction) =>
     new Promise(async (resolve, reject) => {
       try {
         const storedWords = [];
         for (const word of words) {
-          storedWords.push(await WordService.store(word, paragraphId));
+          storedWords.push(
+            await WordService.store(word, paragraphId, transaction)
+          );
         }
         resolve(storedWords);
       } catch (error) {
