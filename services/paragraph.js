@@ -17,8 +17,8 @@ const ParagraphService = {
       try {
         const paragraph = await Paragraph.create({ body }, { transaction });
         const words = paragraph.body.split(' ');
-        resolve(paragraph);
         await WordService.storeAll(words, paragraph.id, transaction);
+        resolve(paragraph);
       } catch (error) {
         reject(error);
       }
