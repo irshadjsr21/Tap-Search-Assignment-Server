@@ -49,15 +49,17 @@ const WordService = {
   /**
    * Store multiple words
    */
-  storeAll: async (words, paragraphId, transaction) =>
+  storeAll: async (words, paragraphId) =>
     new Promise(async (resolve, reject) => {
       try {
+        let transaction = await db.sequelize.transaction();
         const storedWords = [];
         for (const word of words) {
           storedWords.push(
             await WordService.store(word, paragraphId, transaction)
           );
         }
+        await transaction.commit();
         resolve(storedWords);
       } catch (error) {
         reject(error);
